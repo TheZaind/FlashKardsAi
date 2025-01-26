@@ -15,7 +15,7 @@ app.get('/js/config.js', (req, res) => {
     const config = `
 // Generierte Konfiguration
 const config = {
-    API_KEY: '${apiKey}'
+    API_KEY: "${apiKey.replace(/"/g, '\\"')}"
 };
 export default config;
 `.trim();

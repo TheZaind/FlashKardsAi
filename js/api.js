@@ -5,30 +5,14 @@ class AIHandler {
         this.API_KEY = config.API_KEY;
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
         
-        // Validiere API-Key
-        if (!this.API_KEY) {
-            console.error('API-Key ist nicht gesetzt!');
-        } else {
-            console.log('API-Key ist gesetzt (Länge:', this.API_KEY.length, ')');
-            console.log('API-Key Start:', this.API_KEY.substring(0, 4));
-            console.log('API-Key Ende:', this.API_KEY.substring(this.API_KEY.length - 4));
-        }
-
-        // Zusätzliche Validierung
-        if (this.API_KEY.length !== 39 || !this.API_KEY.startsWith('AIza')) {
-            console.error('API-Key hat ungültiges Format!');
-            this.API_KEY = '';
+        // Einfache Validierung
+        if (!this.API_KEY || this.API_KEY.trim() === '') {
+            console.error('API-Key ist nicht gesetzt oder leer');
         }
     }
 
     async generateFlashcards(text) {
-        if (!this.API_KEY || this.API_KEY.trim().length === 0) {
-            console.error('API-Key Validierung fehlgeschlagen:', {
-                keyExists: !!this.API_KEY,
-                keyLength: this.API_KEY ? this.API_KEY.length : 0,
-                keyStart: this.API_KEY ? this.API_KEY.substring(0, 4) : '',
-                keyEnd: this.API_KEY ? this.API_KEY.substring(this.API_KEY.length - 4) : ''
-            });
+        if (!this.API_KEY || this.API_KEY.trim() === '') {
             throw new Error('API-Key ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.');
         }
 
