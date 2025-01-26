@@ -2,12 +2,18 @@ import config from './config.js';
 
 class AIHandler {
     constructor() {
+        console.log('Config beim Laden:', config);
         this.API_KEY = config.API_KEY;
+        console.log('API_KEY direkt nach Zuweisung:', this.API_KEY);
+        
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
         
-        // Einfache Validierung
+        // Debug-Logging
         if (!this.API_KEY || this.API_KEY.trim() === '') {
             console.error('API-Key ist nicht gesetzt oder leer');
+            console.log('Config-Objekt:', JSON.stringify(config));
+        } else {
+            console.log('API-Key wurde erfolgreich geladen');
         }
     }
 

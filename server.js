@@ -11,12 +11,16 @@ app.use(express.json());
 // Middleware zum Injizieren der Konfiguration
 app.get('/js/config.js', (req, res) => {
     const apiKey = process.env.GOOGLE_API_KEY || '';
+    console.log('Server: API Key Länge:', apiKey.length);
+    console.log('Server: API Key erste 4 Zeichen:', apiKey.substring(0, 4));
     
     const config = `
 // Generierte Konfiguration
-const config = {
-    API_KEY: "${apiKey.replace(/"/g, '\\"')}"
+window.serverConfig = {
+    API_KEY: '${apiKey.replace(/'/g, "\\'")}',
+    timestamp: '${new Date().toISOString()}'
 };
+const config = window.serverConfig;
 export default config;
 `.trim();
     
