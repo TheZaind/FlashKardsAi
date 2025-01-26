@@ -11,21 +11,25 @@ app.use(express.json());
 // Middleware zum Injizieren der Konfiguration
 app.get('/js/config.js', (req, res) => {
     const googleApiKey = process.env.GOOGLE_API_KEY;
-    console.log('Server: ENV Variables:', process.env);
-    console.log('Server: GOOGLE_API_KEY vorhanden:', !!googleApiKey);
+    console.log('Server: Umgebungsvariablen:', {
+        GOOGLE_API_KEY_EXISTS: !!process.env.GOOGLE_API_KEY,
+        GOOGLE_API_KEY_LENGTH: process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.length : 0
+    });
     
     // Erstelle das Konfigurations-Objekt
     const configObj = {
         GOOGLE_API_KEY: googleApiKey || ''
     };
     
+    const configString = JSON.stringify(configObj, null, 2);
+    console.log('Server: Konfigurationsobjekt:', configString);
+    
     const config = `
 // Generierte Konfiguration - ${new Date().toISOString()}
-const config = ${JSON.stringify(configObj, null, 2)};
+const config = ${configString};
+console.log('Client: Konfiguration geladen:', config);
 export default config;
 `.trim();
-    
-    console.log('Server: Gesendete Konfiguration:', config);
     
     res.set({
         'Content-Type': 'application/javascript; charset=utf-8',

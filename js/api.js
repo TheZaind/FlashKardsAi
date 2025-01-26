@@ -6,15 +6,23 @@ class AIHandler {
         
         // Prüfe ob der Key existiert
         if (!config.hasOwnProperty('GOOGLE_API_KEY')) {
-            console.error('FATAL: GOOGLE_API_KEY existiert nicht in der Konfiguration!');
-            throw new Error('Konfigurationsfehler: GOOGLE_API_KEY nicht gefunden');
+            console.error('FATAL: GOOGLE_API_KEY fehlt in der Konfiguration!');
+            console.error('Verfügbare Konfiguration:', config);
+            throw new Error('GOOGLE_API_KEY fehlt in der Konfiguration');
         }
         
         this.API_KEY = config.GOOGLE_API_KEY;
-        console.log('GOOGLE_API_KEY Status:', {
-            vorhanden: !!this.API_KEY,
-            leer: this.API_KEY === '',
-            länge: this.API_KEY ? this.API_KEY.length : 0
+        
+        // Validiere API-Key
+        if (!this.API_KEY || this.API_KEY.trim() === '') {
+            console.error('FATAL: GOOGLE_API_KEY ist leer!');
+            throw new Error('GOOGLE_API_KEY ist nicht gesetzt');
+        }
+        
+        console.log('API-Key Status:', {
+            länge: this.API_KEY.length,
+            start: this.API_KEY.substring(0, 4),
+            ende: this.API_KEY.substring(this.API_KEY.length - 4)
         });
         
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
