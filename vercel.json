@@ -16,6 +16,10 @@
         {
             "src": "js/**",
             "use": "@vercel/static"
+        },
+        {
+            "src": "sw.js",
+            "use": "@vercel/static"
         }
     ],
     "rewrites": [
@@ -34,8 +38,25 @@
     ],
     "headers": [
         {
+            "source": "/sw.js",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/javascript; charset=utf-8"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache, no-store, must-revalidate"
+                }
+            ]
+        },
+        {
             "source": "/js/(.*)",
             "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/javascript; charset=utf-8"
+                },
                 {
                     "key": "Cache-Control",
                     "value": "no-cache, no-store, must-revalidate"

@@ -10,19 +10,42 @@ app.use(express.json());
 
 // Middleware zum Injizieren der Konfiguration
 app.get('/js/config.js', (req, res) => {
+    // Stelle sicher, dass der API-Key korrekt formatiert ist
+    const apiKey = process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.trim() : '';
+    
+    if (!apiKey) {
+        console.error('WARNUNG: GOOGLE_API_KEY ist nicht gesetzt!');
+    }
+
     const config = `
         const config = {
-            API_KEY: "${process.env.GOOGLE_API_KEY}"
+            API_KEY: "${apiKey}"
         };
         export default config;
     `.trim();
-    res.type('application/javascript').send(config);
+    
+    res.set('Content-Type', 'application/javascript');
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(config);
 });
 
-// Serve static files
-app.use(express.static('.'));
+// Serve static files with correct MIME types
+app.get('/sw.js', (req, res) => {
+    res.set('Content-Type', 'application/javascript');
+    res.set('Service-Worker-Allowed', '/');
+    res.sendFile(join(__dirname, 'sw.js'));
+});
 
-// Serve index.html for all routes (SPA support)
+// Serve other static files
+app.use(express.static('.', {
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.set('Content-Type', 'application/javascript');
+        }
+    }
+}));
+
+// Serve index.html for all other routes (SPA support)
 app.get('*', (req, res) => {
     res.sendFile(join(__dirname, 'index.html'));
 });
