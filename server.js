@@ -21,12 +21,22 @@ app.get('/js/config.js', (req, res) => {
         const config = {
             API_KEY: "${apiKey}"
         };
+        console.log('Config loaded, API_KEY length:', config.API_KEY.length);
         export default config;
     `.trim();
     
     res.set('Content-Type', 'application/javascript');
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.send(config);
+});
+
+// API endpoint to check configuration
+app.get('/api/check-config', (req, res) => {
+    const apiKey = process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.trim() : '';
+    res.json({
+        hasApiKey: !!apiKey,
+        keyLength: apiKey.length
+    });
 });
 
 // Serve static files with correct MIME types
@@ -53,4 +63,8 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server läuft auf Port ${PORT}`);
+    console.log('API Key vorhanden:', !!process.env.GOOGLE_API_KEY);
+    if (process.env.GOOGLE_API_KEY) {
+        console.log('API Key Länge:', process.env.GOOGLE_API_KEY.length);
+    }
 }); 

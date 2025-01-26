@@ -4,9 +4,20 @@ class AIHandler {
     constructor() {
         this.API_KEY = config.API_KEY;
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+        
+        // Validiere API-Key
+        if (!this.API_KEY) {
+            console.error('API-Key ist nicht gesetzt!');
+        } else {
+            console.log('API-Key ist gesetzt (Länge:', this.API_KEY.length, ')');
+        }
     }
 
     async generateFlashcards(text) {
+        if (!this.API_KEY) {
+            throw new Error('API-Key ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.');
+        }
+
         if (!text || text.trim().length === 0) {
             throw new Error('Kein Text zum Verarbeiten vorhanden');
         }
