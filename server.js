@@ -10,14 +10,18 @@ app.use(express.json());
 
 // Middleware zum Injizieren der Konfiguration
 app.get('/js/config.js', (req, res) => {
-    const apiKey = process.env.GOOGLE_API_KEY || '';
-    console.log('Server: API Key Länge:', apiKey.length);
-    console.log('Server: API Key erste 4 Zeichen:', apiKey.substring(0, 4));
+    const googleApiKey = process.env.GOOGLE_API_KEY;
+    console.log('Server: GOOGLE_API_KEY vorhanden:', !!googleApiKey);
+    console.log('Server: GOOGLE_API_KEY Länge:', googleApiKey ? googleApiKey.length : 0);
+    
+    if (!googleApiKey) {
+        console.error('Server: GOOGLE_API_KEY ist nicht in den Umgebungsvariablen gesetzt!');
+    }
     
     const config = `
 // Generierte Konfiguration
 window.serverConfig = {
-    API_KEY: '${apiKey.replace(/'/g, "\\'")}',
+    GOOGLE_API_KEY: '${(googleApiKey || '').replace(/'/g, "\\'")}',
     timestamp: '${new Date().toISOString()}'
 };
 const config = window.serverConfig;
