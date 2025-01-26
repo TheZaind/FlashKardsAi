@@ -2,19 +2,22 @@ import config from './config.js';
 
 class AIHandler {
     constructor() {
-        console.log('Config beim Laden:', config);
+        console.log('Rohe Konfiguration:', config);
+        
+        // Prüfe ob der Key existiert
+        if (!config.hasOwnProperty('GOOGLE_API_KEY')) {
+            console.error('FATAL: GOOGLE_API_KEY existiert nicht in der Konfiguration!');
+            throw new Error('Konfigurationsfehler: GOOGLE_API_KEY nicht gefunden');
+        }
+        
         this.API_KEY = config.GOOGLE_API_KEY;
-        console.log('GOOGLE_API_KEY direkt nach Zuweisung:', this.API_KEY);
+        console.log('GOOGLE_API_KEY Status:', {
+            vorhanden: !!this.API_KEY,
+            leer: this.API_KEY === '',
+            länge: this.API_KEY ? this.API_KEY.length : 0
+        });
         
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
-        
-        // Debug-Logging
-        if (!this.API_KEY || this.API_KEY.trim() === '') {
-            console.error('GOOGLE_API_KEY ist nicht gesetzt oder leer');
-            console.log('Config-Objekt:', JSON.stringify(config));
-        } else {
-            console.log('GOOGLE_API_KEY wurde erfolgreich geladen');
-        }
     }
 
     async generateFlashcards(text) {
