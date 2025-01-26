@@ -2,7 +2,8 @@ import config from './config.js';
 
 class AIHandler {
     constructor() {
-        this.API_KEY = config.API_KEY;
+        // Stelle sicher, dass der API-Key als String vorliegt
+        this.API_KEY = String(config.API_KEY || '').trim();
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
         
         // Validiere API-Key
@@ -10,9 +11,14 @@ class AIHandler {
             console.error('API-Key ist nicht gesetzt!');
         } else {
             console.log('API-Key ist gesetzt (Länge:', this.API_KEY.length, ')');
-            // Log die ersten und letzten 4 Zeichen für Debugging
             console.log('API-Key Start:', this.API_KEY.substring(0, 4));
             console.log('API-Key Ende:', this.API_KEY.substring(this.API_KEY.length - 4));
+        }
+
+        // Zusätzliche Validierung
+        if (this.API_KEY.length !== 39 || !this.API_KEY.startsWith('AIza')) {
+            console.error('API-Key hat ungültiges Format!');
+            this.API_KEY = '';
         }
     }
 
