@@ -30,7 +30,7 @@ class UI {
         const exportBtn = document.getElementById('exportDecks');
         exportBtn?.addEventListener('click', async () => {
             try {
-                await cardManager.exportAllDecks();
+                await cardManager.exportDecks();
                 this.showToast('Decks wurden erfolgreich exportiert!', 'success');
             } catch (error) {
                 this.showToast('Fehler beim Exportieren der Decks: ' + error.message, 'error');
@@ -171,10 +171,10 @@ class UI {
                 const deckElement = document.createElement('div');
                 deckElement.className = 'deck-card';
                 deckElement.innerHTML = `
-                    <h3>${deck.name || 'Unbenanntes Deck'}</h3>
+                    <h3>${deck.title || 'Unbenanntes Deck'}</h3>
                     <div class="deck-info">
                         <p>${deck.cards?.length || 0} Karten</p>
-                        <p>Erstellt: ${new Date(deck.created || Date.now()).toLocaleDateString()}</p>
+                        <p>Erstellt: ${new Date(deck.createdAt).toLocaleDateString()}</p>
                     </div>
                 `;
                 
