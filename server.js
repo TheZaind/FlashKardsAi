@@ -9,6 +9,22 @@ const __dirname = dirname(__filename);
 
 const app = express();
 app.use(express.json());
+
+// Middleware zum Injizieren der Konfiguration
+app.use((req, res, next) => {
+    if (req.path.endsWith('config.js')) {
+        const config = `
+            const config = {
+                API_KEY: '${process.env.GOOGLE_API_KEY}'
+            };
+            export default config;
+        `;
+        res.type('application/javascript').send(config);
+    } else {
+        next();
+    }
+});
+
 app.use(express.static(__dirname));
 
 // Stelle sicher, dass der Decks-Ordner existiert

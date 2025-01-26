@@ -1,6 +1,8 @@
+import config from './config.js';
+
 class AIHandler {
     constructor() {
-        this.API_KEY = process.env.GOOGLE_API_KEY;
+        this.API_KEY = config.API_KEY;
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
     }
 
