@@ -21,13 +21,15 @@ app.get('/js/config.js', (req, res) => {
         console.log('Server: API-Key Ende:', apiKey.substring(apiKey.length - 4));
     }
 
+    // Escape den API-Key für JavaScript
+    const escapedKey = apiKey.replace(/[\\'"]/g, '\\$&');
+
     const config = `
-        const config = {
-            API_KEY: "${apiKey}"
-        };
-        console.log('Config loaded, API_KEY length:', config.API_KEY.length);
-        export default config;
-    `.trim();
+const config = {
+    API_KEY: '${escapedKey}'
+};
+console.log('Config loaded, API_KEY length:', config.API_KEY.length);
+export default config;`.trim();
     
     res.set('Content-Type', 'application/javascript');
     res.set('Cache-Control', 'no-cache, no-store, must-revalidate');

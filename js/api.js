@@ -18,6 +18,12 @@ class AIHandler {
 
     async generateFlashcards(text) {
         if (!this.API_KEY || this.API_KEY.trim().length === 0) {
+            console.error('API-Key Validierung fehlgeschlagen:', {
+                keyExists: !!this.API_KEY,
+                keyLength: this.API_KEY ? this.API_KEY.length : 0,
+                keyStart: this.API_KEY ? this.API_KEY.substring(0, 4) : '',
+                keyEnd: this.API_KEY ? this.API_KEY.substring(this.API_KEY.length - 4) : ''
+            });
             throw new Error('API-Key ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.');
         }
 
