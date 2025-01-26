@@ -9,7 +9,16 @@
     "routes": [
         {
             "src": "/js/config.js",
-            "dest": "server.js"
+            "dest": "server.js",
+            "headers": {
+                "cache-control": "no-cache, no-store, must-revalidate"
+            }
+        },
+        {
+            "src": "/js/(.*)",
+            "headers": {
+                "cache-control": "no-cache, no-store, must-revalidate"
+            }
         },
         {
             "src": "/api/(.*)",
@@ -21,6 +30,17 @@
         {
             "src": "/(.*)",
             "dest": "server.js"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache, no-store, must-revalidate"
+                }
+            ]
         }
     ]
 } 
