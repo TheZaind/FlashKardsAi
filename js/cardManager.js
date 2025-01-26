@@ -1,5 +1,6 @@
 class CardManager {
     constructor() {
+        this.decks = [];
         this.currentDeck = null;
         this.currentCardIndex = 0;
         this.remainingCards = [];
@@ -11,21 +12,11 @@ class CardManager {
 
     async initializeStorage() {
         try {
-            // Stelle sicher, dass der Backup-Ordner existiert
-            const response = await fetch('/api/ensureBackupDir', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ path: this.backupPath })
-            });
-            
-            if (!response.ok) {
-                console.error('Fehler beim Erstellen des Backup-Ordners');
+            // Lade Decks aus dem localStorage
+            const savedDecks = localStorage.getItem('flashcards_decks');
+            if (savedDecks) {
+                this.decks = JSON.parse(savedDecks);
             }
-            
-            // Lade alle gespeicherten Decks beim Start
-            await this.loadDecksFromStorage();
         } catch (error) {
             console.error('Fehler beim Initialisieren des Speichers:', error);
         }
@@ -33,68 +24,83 @@ class CardManager {
 
     async loadDecksFromStorage() {
         try {
-            const response = await fetch('/api/loadDecks');
-            if (response.ok) {
-                const decks = await response.json();
-                localStorage.setItem('flashcards_decks', JSON.stringify(decks));
+            const savedDecks = localStorage.getItem('flashcards_decks');
+            if (savedDecks) {
+                this.decks = JSON.parse(savedDecks);
             }
+            return this.decks;
         } catch (error) {
             console.error('Fehler beim Laden der Decks:', error);
+            throw new Error('Fehler beim Laden der Decks');
         }
     }
 
-    async createDeck(name, cards) {
-        // Generiere eine zufällige UUID
-        const uuid = crypto.randomUUID();
-        
+    async saveDeck(deck) {
+        try {
+            // Füge das neue Deck hinzu oder aktualisiere ein bestehendes
+            const existingIndex = this.decks.findIndex(d => d.id === deck.id);
+            if (existingIndex >= 0) {
+                this.decks[existingIndex] = deck;
+            } else {
+                this.decks.push(deck);
+            }
+            
+            // Speichere alle Decks im localStorage
+            localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
+            return true;
+        } catch (error) {
+            console.error('Fehler beim Speichern des Decks:', error);
+            throw new Error('Fehler beim Speichern des Decks');
+        }
+    }
+
+    async createDeck(title, cards) {
         const deck = {
-            id: uuid,
-            name: name.trim(), // Entferne Leerzeichen am Anfang und Ende
-            cards: cards.map(card => ({
-                ...card,
-                status: 'new',
-                attempts: 0,
-                correctAttempts: 0
-            })),
-            created: Date.now(),
-            lastReview: null
+            id: Date.now(),
+            title: title,
+            cards: cards,
+            createdAt: new Date().toISOString()
         };
 
         await this.saveDeck(deck);
         return deck;
     }
 
-    async saveDeck(deck) {
-        const decks = await this.getAllDecks();
-        const existingIndex = decks.findIndex(d => d.id === deck.id);
-        
-        if (existingIndex >= 0) {
-            decks[existingIndex] = deck;
-        } else {
-            decks.push(deck);
-        }
-
-        localStorage.setItem('flashcards_decks', JSON.stringify(decks));
-        
-        // Speichere das Deck auch als separate Datei
+    async exportDecks() {
         try {
-            const response = await fetch('/api/saveDeck', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    deck,
-                    filename: `${this.backupPath}${deck.id}.json`
-                })
-            });
+            const decksJson = JSON.stringify(this.decks, null, 2);
+            const blob = new Blob([decksJson], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             
-            if (!response.ok) {
-                throw new Error('Fehler beim Speichern des Decks');
-            }
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `flashcards_export_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            return true;
         } catch (error) {
-            console.error('Fehler beim Speichern des Decks:', error);
-            throw error;
+            console.error('Fehler beim Exportieren der Decks:', error);
+            throw new Error('Fehler beim Exportieren der Decks');
+        }
+    }
+
+    async importDecks(jsonContent) {
+        try {
+            const importedDecks = JSON.parse(jsonContent);
+            if (!Array.isArray(importedDecks)) {
+                throw new Error('Ungültiges Dateiformat');
+            }
+
+            // Füge die importierten Decks zu den bestehenden hinzu
+            this.decks = [...this.decks, ...importedDecks];
+            localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
+            return true;
+        } catch (error) {
+            console.error('Fehler beim Importieren der Decks:', error);
+            throw new Error('Fehler beim Importieren der Decks');
         }
     }
 
@@ -224,6 +230,6 @@ class CardManager {
     }
 }
 
-// Export a singleton instance
+// Create and export a singleton instance
 const cardManager = new CardManager();
 export default cardManager; 
