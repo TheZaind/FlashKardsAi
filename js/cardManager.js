@@ -6,46 +6,26 @@ class CardManager {
         this.remainingCards = [];
         this.completedCards = [];
         this.isInStudySession = false;
-        this.initializeStorage();
+        this.loadFromStorage();
     }
 
-    async initializeStorage() {
+    loadFromStorage() {
         try {
             const savedDecks = localStorage.getItem('flashcards_decks');
             if (savedDecks) {
                 this.decks = JSON.parse(savedDecks);
             }
-        } catch (error) {
-            console.error('Fehler beim Initialisieren des Speichers:', error);
-        }
-    }
-
-    async loadDecksFromStorage() {
-        try {
-            const savedDecks = localStorage.getItem('flashcards_decks');
-            if (savedDecks) {
-                this.decks = JSON.parse(savedDecks);
-            }
-            return this.decks;
         } catch (error) {
             console.error('Fehler beim Laden der Decks:', error);
-            throw new Error('Fehler beim Laden der Decks');
+            this.decks = [];
         }
     }
 
-    async saveDeck(deck) {
+    saveToStorage() {
         try {
-            const existingIndex = this.decks.findIndex(d => d.id === deck.id);
-            if (existingIndex >= 0) {
-                this.decks[existingIndex] = deck;
-            } else {
-                this.decks.push(deck);
-            }
             localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
-            return true;
         } catch (error) {
-            console.error('Fehler beim Speichern des Decks:', error);
-            throw new Error('Fehler beim Speichern des Decks');
+            console.error('Fehler beim Speichern der Decks:', error);
         }
     }
 
@@ -62,8 +42,22 @@ class CardManager {
             createdAt: new Date().toISOString()
         };
 
-        await this.saveDeck(deck);
+        this.decks.push(deck);
+        this.saveToStorage();
         return deck;
+    }
+
+    async getAllDecks() {
+        return this.decks;
+    }
+
+    async getDeck(id) {
+        return this.decks.find(deck => deck.id === id);
+    }
+
+    async deleteDeck(id) {
+        this.decks = this.decks.filter(deck => deck.id !== id);
+        this.saveToStorage();
     }
 
     async exportDecks() {
@@ -94,9 +88,8 @@ class CardManager {
                 throw new Error('Ungültiges Dateiformat');
             }
 
-            // Füge die importierten Decks zu den bestehenden hinzu
             this.decks = [...this.decks, ...importedDecks];
-            localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
+            this.saveToStorage();
             return true;
         } catch (error) {
             console.error('Fehler beim Importieren der Decks:', error);
@@ -107,33 +100,11 @@ class CardManager {
     async loadDecksFromJson(file) {
         try {
             const text = await file.text();
-            const importedDecks = JSON.parse(text);
-            
-            if (!Array.isArray(importedDecks)) {
-                throw new Error('Ungültiges Dateiformat');
-            }
-
-            // Füge die importierten Decks zu den bestehenden hinzu
-            this.decks = [...this.decks, ...importedDecks];
-            localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
-            return true;
+            return this.importDecks(text);
         } catch (error) {
             console.error('Fehler beim Laden der Decks aus der Datei:', error);
             throw new Error('Fehler beim Laden der Decks aus der Datei');
         }
-    }
-
-    async getAllDecks() {
-        return this.decks;
-    }
-
-    async getDeck(id) {
-        return this.decks.find(deck => deck.id === id);
-    }
-
-    async deleteDeck(id) {
-        this.decks = this.decks.filter(deck => deck.id !== id);
-        localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
     }
 
     // Study session methods
@@ -189,6 +160,15 @@ class CardManager {
             const card = this.remainingCards.shift();
             const randomPosition = Math.floor(Math.random() * this.remainingCards.length);
             this.remainingCards.splice(randomPosition, 0, card);
+        }
+
+        // Update the original deck with the new card stats
+        if (this.currentDeck) {
+            const originalDeck = this.decks.find(d => d.id === this.currentDeck.id);
+            if (originalDeck) {
+                originalDeck.cards = this.currentDeck.cards;
+                this.saveToStorage();
+            }
         }
 
         return this.getNextCard();
