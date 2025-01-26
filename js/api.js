@@ -1,6 +1,6 @@
 class AIHandler {
     constructor() {
-        this.API_KEY = 'AIzaSyCzktw9jq_yQ0s4kvjT7HQh0SR5to_3E_I';
+        this.API_KEY = process.env.GOOGLE_API_KEY;
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
     }
 
