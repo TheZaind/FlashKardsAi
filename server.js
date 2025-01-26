@@ -10,18 +10,14 @@ const app = express();
 app.use(express.json());
 
 // Middleware zum Injizieren der Konfiguration
-app.use((req, res, next) => {
-    if (req.path.endsWith('config.js')) {
-        const config = `
-            const config = {
-                API_KEY: '${process.env.GOOGLE_API_KEY}'
-            };
-            export default config;
-        `;
-        res.type('application/javascript').send(config);
-    } else {
-        next();
-    }
+app.get('/js/config.js', (req, res) => {
+    const config = `
+        const config = {
+            API_KEY: "${process.env.GOOGLE_API_KEY}"
+        };
+        export default config;
+    `.trim();
+    res.type('application/javascript').send(config);
 });
 
 app.use(express.static(__dirname));
