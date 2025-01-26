@@ -3,18 +3,21 @@ import config from './config.js';
 class AIHandler {
     constructor() {
         this.API_KEY = config.API_KEY;
-        this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
+        this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
         
         // Validiere API-Key
         if (!this.API_KEY) {
             console.error('API-Key ist nicht gesetzt!');
         } else {
             console.log('API-Key ist gesetzt (Länge:', this.API_KEY.length, ')');
+            // Log die ersten und letzten 4 Zeichen für Debugging
+            console.log('API-Key Start:', this.API_KEY.substring(0, 4));
+            console.log('API-Key Ende:', this.API_KEY.substring(this.API_KEY.length - 4));
         }
     }
 
     async generateFlashcards(text) {
-        if (!this.API_KEY) {
+        if (!this.API_KEY || this.API_KEY.trim().length === 0) {
             throw new Error('API-Key ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.');
         }
 
@@ -36,6 +39,7 @@ class AIHandler {
         `;
 
         try {
+            console.log('Sende Anfrage an API mit Key-Länge:', this.API_KEY.length);
             const response = await fetch(`${this.API_URL}?key=${this.API_KEY}`, {
                 method: 'POST',
                 headers: {
@@ -62,6 +66,7 @@ class AIHandler {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
+                console.error('API Fehler:', errorData);
                 throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
             }
 

@@ -15,6 +15,10 @@ app.get('/js/config.js', (req, res) => {
     
     if (!apiKey) {
         console.error('WARNUNG: GOOGLE_API_KEY ist nicht gesetzt!');
+    } else {
+        console.log('Server: API-Key ist gesetzt (Länge:', apiKey.length, ')');
+        console.log('Server: API-Key Start:', apiKey.substring(0, 4));
+        console.log('Server: API-Key Ende:', apiKey.substring(apiKey.length - 4));
     }
 
     const config = `
@@ -35,7 +39,9 @@ app.get('/api/check-config', (req, res) => {
     const apiKey = process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.trim() : '';
     res.json({
         hasApiKey: !!apiKey,
-        keyLength: apiKey.length
+        keyLength: apiKey.length,
+        keyStart: apiKey ? apiKey.substring(0, 4) : '',
+        keyEnd: apiKey ? apiKey.substring(apiKey.length - 4) : ''
     });
 });
 
