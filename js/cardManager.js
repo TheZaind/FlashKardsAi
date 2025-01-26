@@ -6,13 +6,11 @@ class CardManager {
         this.remainingCards = [];
         this.completedCards = [];
         this.isInStudySession = false;
-        this.backupPath = 'decks/'; // Ordner für Deck-Backups
         this.initializeStorage();
     }
 
     async initializeStorage() {
         try {
-            // Lade Decks aus dem localStorage
             const savedDecks = localStorage.getItem('flashcards_decks');
             if (savedDecks) {
                 this.decks = JSON.parse(savedDecks);
@@ -37,15 +35,12 @@ class CardManager {
 
     async saveDeck(deck) {
         try {
-            // Füge das neue Deck hinzu oder aktualisiere ein bestehendes
             const existingIndex = this.decks.findIndex(d => d.id === deck.id);
             if (existingIndex >= 0) {
                 this.decks[existingIndex] = deck;
             } else {
                 this.decks.push(deck);
             }
-            
-            // Speichere alle Decks im localStorage
             localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
             return true;
         } catch (error) {
@@ -58,7 +53,12 @@ class CardManager {
         const deck = {
             id: Date.now(),
             title: title,
-            cards: cards,
+            cards: cards.map(card => ({
+                ...card,
+                status: 'new',
+                attempts: 0,
+                correctAttempts: 0
+            })),
             createdAt: new Date().toISOString()
         };
 
@@ -104,42 +104,19 @@ class CardManager {
         }
     }
 
-    async exportAllDecks() {
-        try {
-            const decks = await this.getAllDecks();
-            const response = await fetch('/api/exportDecks', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    decks,
-                    filename: `${this.backupPath}all_decks_${Date.now()}.json`
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error('Fehler beim Exportieren der Decks');
-            }
-            
-            return `${this.backupPath}all_decks_${Date.now()}.json`;
-        } catch (error) {
-            console.error('Fehler beim Exportieren der Decks:', error);
-            throw error;
-        }
-    }
-
     async loadDecksFromJson(file) {
         try {
             const text = await file.text();
-            const decks = JSON.parse(text);
+            const importedDecks = JSON.parse(text);
             
-            // Speichere jedes Deck einzeln
-            for (const deck of decks) {
-                await this.saveDeck(deck);
+            if (!Array.isArray(importedDecks)) {
+                throw new Error('Ungültiges Dateiformat');
             }
-            
-            return decks;
+
+            // Füge die importierten Decks zu den bestehenden hinzu
+            this.decks = [...this.decks, ...importedDecks];
+            localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
+            return true;
         } catch (error) {
             console.error('Fehler beim Laden der Decks aus der Datei:', error);
             throw new Error('Fehler beim Laden der Decks aus der Datei');
@@ -147,21 +124,19 @@ class CardManager {
     }
 
     async getAllDecks() {
-        const decksJson = localStorage.getItem('flashcards_decks');
-        return decksJson ? JSON.parse(decksJson) : [];
+        return this.decks;
     }
 
     async getDeck(id) {
-        const decks = await this.getAllDecks();
-        return decks.find(deck => deck.id === id);
+        return this.decks.find(deck => deck.id === id);
     }
 
     async deleteDeck(id) {
-        const decks = await this.getAllDecks();
-        const filteredDecks = decks.filter(deck => deck.id !== id);
-        localStorage.setItem('flashcards_decks', JSON.stringify(filteredDecks));
+        this.decks = this.decks.filter(deck => deck.id !== id);
+        localStorage.setItem('flashcards_decks', JSON.stringify(this.decks));
     }
 
+    // Study session methods
     async startStudySession(deckId) {
         const deck = await this.getDeck(deckId);
         if (!deck) return null;
