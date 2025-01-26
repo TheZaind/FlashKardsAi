@@ -4,19 +4,17 @@ class AIHandler {
     constructor() {
         console.log('Rohe Konfiguration:', config);
         
-        // Prüfe ob der Key existiert
-        if (!config.hasOwnProperty('GOOGLE_API_KEY')) {
-            console.error('FATAL: GOOGLE_API_KEY fehlt in der Konfiguration!');
-            console.error('Verfügbare Konfiguration:', config);
-            throw new Error('GOOGLE_API_KEY fehlt in der Konfiguration');
-        }
-        
-        this.API_KEY = config.GOOGLE_API_KEY;
+        // Versuche beide Varianten des API-Keys
+        this.API_KEY = config.GOOGLE_API_KEY || config.API_KEY;
         
         // Validiere API-Key
         if (!this.API_KEY || this.API_KEY.trim() === '') {
-            console.error('FATAL: GOOGLE_API_KEY ist leer!');
-            throw new Error('GOOGLE_API_KEY ist nicht gesetzt');
+            console.error('FATAL: Kein gültiger API-Key gefunden!');
+            console.error('Verfügbare Keys:', {
+                GOOGLE_API_KEY: config.GOOGLE_API_KEY,
+                API_KEY: config.API_KEY
+            });
+            throw new Error('Kein gültiger API-Key gefunden');
         }
         
         console.log('API-Key Status:', {
