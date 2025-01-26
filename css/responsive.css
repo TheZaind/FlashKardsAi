@@ -1,0 +1,75 @@
+/* Mobile First Design */
+@media screen and (max-width: 480px) {
+    .app-container {
+        padding: 0.5rem;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .card {
+        height: 250px;
+    }
+
+    .button-container button {
+        padding: 0.6rem 1.2rem;
+    }
+}
+
+/* Tablet */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    .app-container {
+        padding: 0.75rem;
+    }
+
+    .card {
+        height: 275px;
+    }
+}
+
+/* Desktop */
+@media screen and (min-width: 769px) {
+    .app-container {
+        max-width: 1200px;
+        padding: 2rem;
+    }
+
+    .deck-list {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+}
+
+/* Landscape Mode */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+    .card {
+        height: 200px;
+    }
+
+    .button-container {
+        flex-direction: row;
+        justify-content: center;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #121212;
+        --text-color: #ffffff;
+    }
+
+    .card-front, .card-back, .deck-card, #preview {
+        background-color: #1e1e1e;
+        color: var(--text-color);
+    }
+
+    .file-input-area {
+        border-color: var(--primary-color);
+    }
+} 
