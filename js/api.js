@@ -2,8 +2,7 @@ import config from './config.js';
 
 class AIHandler {
     constructor() {
-        // Stelle sicher, dass der API-Key als String vorliegt
-        this.API_KEY = String(config.API_KEY || '').trim();
+        this.API_KEY = config.API_KEY;
         this.API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
         
         // Validiere API-Key

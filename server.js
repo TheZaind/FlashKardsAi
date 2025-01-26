@@ -10,25 +10,13 @@ app.use(express.json());
 
 // Middleware zum Injizieren der Konfiguration
 app.get('/js/config.js', (req, res) => {
-    // Stelle sicher, dass der API-Key korrekt formatiert ist
-    const apiKey = process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.trim() : '';
+    const apiKey = process.env.GOOGLE_API_KEY || '';
     
-    if (!apiKey) {
-        console.error('WARNUNG: GOOGLE_API_KEY ist nicht gesetzt!');
-    } else {
-        console.log('Server: API-Key ist gesetzt (Länge:', apiKey.length, ')');
-        console.log('Server: API-Key Start:', apiKey.substring(0, 4));
-        console.log('Server: API-Key Ende:', apiKey.substring(apiKey.length - 4));
-    }
-
-    const configObject = {
-        API_KEY: apiKey
-    };
-
     const config = `
 // Generierte Konfiguration
-const config = ${JSON.stringify(configObject, null, 4)};
-console.log('Config loaded with API key:', !!config.API_KEY, 'length:', config.API_KEY.length);
+const config = {
+    API_KEY: '${apiKey}'
+};
 export default config;
 `.trim();
     
@@ -43,7 +31,7 @@ export default config;
 
 // API endpoint to check configuration
 app.get('/api/check-config', (req, res) => {
-    const apiKey = process.env.GOOGLE_API_KEY ? process.env.GOOGLE_API_KEY.trim() : '';
+    const apiKey = process.env.GOOGLE_API_KEY || '';
     res.json({
         hasApiKey: !!apiKey,
         keyLength: apiKey.length,
@@ -76,8 +64,4 @@ app.get('*', (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server läuft auf Port ${PORT}`);
-    console.log('API Key vorhanden:', !!process.env.GOOGLE_API_KEY);
-    if (process.env.GOOGLE_API_KEY) {
-        console.log('API Key Länge:', process.env.GOOGLE_API_KEY.length);
-    }
 }); 
