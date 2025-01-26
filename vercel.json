@@ -18,35 +18,30 @@
             "use": "@vercel/static"
         }
     ],
-    "routes": [
+    "rewrites": [
         {
-            "src": "/js/config.js",
-            "dest": "server.js",
-            "headers": {
-                "cache-control": "no-cache, no-store, must-revalidate"
-            }
+            "source": "/js/config.js",
+            "destination": "/server.js"
         },
         {
-            "src": "/api/(.*)",
-            "dest": "server.js"
+            "source": "/api/(.*)",
+            "destination": "/server.js"
         },
         {
-            "src": "/js/(.*)",
-            "dest": "/js/$1",
-            "headers": {
-                "cache-control": "no-cache, no-store, must-revalidate"
-            }
-        },
-        {
-            "src": "/css/(.*)",
-            "dest": "/css/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
+            "source": "/(.*)",
+            "destination": "/server.js"
         }
     ],
     "headers": [
+        {
+            "source": "/js/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache, no-store, must-revalidate"
+                }
+            ]
+        },
         {
             "source": "/(.*)",
             "headers": [
